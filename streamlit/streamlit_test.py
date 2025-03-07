@@ -37,15 +37,51 @@ if st.session_state.stage == 1:
     rows = session.sql("SELECT * FROM CUSTOMERS;").collect()
     st.write(rows)
 
+    cust_left, cust_right = st.columns([2,1])
+    
+    # Form for adding new customer
+    with cust_left.form("add_customer"):
+        name = st.text_input("Name")
+        email = st.text_input("Email")
+        address = st.text_input("Address")
+        submitted = st.form_submit_button("Add Customer")
+
+        if submitted:
+            session.sql("""
+                        INSERT INTO CUSTOMERS (NAME, EMAIL, ADDRESS)
+                        VALUES (?, ?, ?)
+                        """, 
+                        params=[name, email, address]).collect()
+            
+            st.success("Customer added!")
+            st.rerun()
+
+    # For deleting customer
+    with cust_right.form("del_customer"):
+        cust_id = st.text_input("Customer ID")
+        if st.form_submit_button("Delete Customer"):
+            session.sql("""
+                        DELETE FROM CUSTOMERS
+                        WHERE ID = ?
+                        """,
+                       params=[cust_id]).collect()
+            session.sql("""
+                        DELETE FROM ORDERS
+                        WHERE CUSTOMER_ID = ?
+                        """,
+                       params=[cust_id]).collect()
+            st.success(f"Deleted customer with ID {cust_id}")
+            st.rerun()
+
 # Orders
 if st.session_state.stage == 2:
     query = """
-    SELECT O.ORDER_ID, C.NAME AS CUSTOMER, P.NAME AS PRODUCT, O.QUANTITY, O.TOTAL_PRICE, O.ORDER_DATE
-    FROM ORDERS O
-    JOIN CUSTOMERS C ON C.ID = O.CUSTOMER_ID
-    JOIN PRODUCTS P ON P.PRODUCT_ID = O.PRODUCT_ID
-    ORDER BY O.ORDER_DATE DESC;
-    """
+            SELECT O.ORDER_ID, C.NAME AS CUSTOMER, P.NAME AS PRODUCT, O.QUANTITY, O.TOTAL_PRICE, O.ORDER_DATE
+            FROM ORDERS O
+            JOIN CUSTOMERS C ON C.ID = O.CUSTOMER_ID
+            JOIN PRODUCTS P ON P.PRODUCT_ID = O.PRODUCT_ID
+            ORDER BY O.ORDER_DATE DESC;
+            """
     rows = session.sql(query).collect()
     st.write(rows)
 

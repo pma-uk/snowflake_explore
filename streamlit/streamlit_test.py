@@ -1,6 +1,7 @@
 import streamlit as st
 from snowflake.snowpark.context import get_active_session
 
+
 # Get current credentials
 session = get_active_session()
 
@@ -25,6 +26,10 @@ if button_cols[0].button("Show Customers"):
 if button_cols[1].button("Show Orders"):
     st.session_state.stage = 2
 
+# Show Products
+if button_cols[2].button("Show Products"):
+    st.session_state.stage = 3
+
 
 # Check the stage and display it correspondingly
 # Customers
@@ -42,4 +47,9 @@ if st.session_state.stage == 2:
     ORDER BY O.ORDER_DATE DESC;
     """
     rows = session.sql(query).collect()
+    st.write(rows)
+
+# Products
+if st.session_state.stage == 3:
+    rows = session.sql("SELECT * FROM PRODUCTS;").collect()
     st.write(rows)

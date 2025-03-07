@@ -89,3 +89,37 @@ if st.session_state.stage == 2:
 if st.session_state.stage == 3:
     rows = session.sql("SELECT * FROM PRODUCTS;").collect()
     st.write(rows)
+
+    prod_left, prod_right = st.columns([2,1])
+
+    with prod_left.form("add_product"):
+        name = st.text_input("Name")
+        category = st.text_input("Category")
+        price = st.number_input("Price")
+        submitted = st.form_submit_button("Add Product")
+
+        if submitted:
+            session.sql("""
+                        INSERT INTO PRODUCTS (NAME, CATEGORY, PRICE)
+                        VALUES (?, ?, ?)
+                        """, 
+                        params=[name, category, price]).collect()
+            
+            st.success("Product added!")
+            st.rerun()
+
+    with prod_right.form("del_product"):
+        prod_id = st.text_input("Product ID")
+        if st.form_submit_button("Delete Product"):
+            session.sql("""
+                        DELETE FROM PRODUCTS
+                        WHERE PRODUCT_ID = ?
+                        """,
+                       params=[prod_id]).collect()
+            session.sql("""
+                        DELETE FROM ORDERS
+                        WHERE PRODUCT_ID = ?
+                        """,
+                       params=[prod_id]).collect()
+            st.success(f"Deleted product with ID {prod_id}")
+            st.rerun()

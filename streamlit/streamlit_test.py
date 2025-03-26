@@ -48,7 +48,7 @@ def show_orders():
             FROM ORDERS O
             JOIN CUSTOMERS C ON C.ID = O.CUSTOMER_ID
             JOIN PRODUCTS P ON P.PRODUCT_ID = O.PRODUCT_ID
-            ORDER BY O.ORDER_ID DESC;
+            ORDER BY O.ORDER_ID;
             """
     rows = session.sql(query).collect()
     st.write(rows)

@@ -19,15 +19,15 @@ def main(session: snowpark.Session):
 
     # Populate Products table
     products = [
-        ("Laptop", "Electronics", 999.99),
-        ("Smartphone", "Electronics", 599.99),
-        ("Headphones", "Accessories", 99.99),
-        ("Tablet", "Electronics", 399.99),
-        ("Backpack", "Fashion", 49.99)
+        ("iShares Core MSCI World UCITS ETF", "IWDA", "LON", 100.95),
+        ("Vanguard S&P 500 UCITS ETF", "VUSD", "LON", 108.60),
+        ("Invesco S&P 500 UCITS ETF", "SPXS", "LON", 1137.90),
+        ("Vanguard FTSE All-World UCITS ETF", "VWRD", "LON", 138.99),
+        ("iShares Core FTSE 100 UCITS ETF", "ISF", "LON", 848.10)
     ]
 
-    for name, category, price in products:
-        session.sql(f"INSERT INTO PRODUCTS (NAME, CATEGORY, PRICE) VALUES ('{name}', '{category}', {price});").collect()
+    for name, ticker, exchange, price in products:
+        session.sql(f"INSERT INTO PRODUCTS (NAME, TICKER, EXCHANGE, PRICE) VALUES ('{name}', '{ticker}', '{exchange}', {price});").collect()
 
     # Retrieve generated customer and product IDs
     customer_ids = [row[0] for row in session.sql("SELECT ID FROM CUSTOMERS;").collect()]

@@ -6,7 +6,7 @@ from snowflake.snowpark.context import get_active_session
 session = get_active_session()
 
 
-# Function to display Customers
+# Display Customers
 def show_customers():
     st.write("### Customers List")
     rows = session.sql("SELECT * FROM CUSTOMERS;").collect()
@@ -40,21 +40,21 @@ def show_customers():
             st.rerun()
 
 
-# Function to display Orders
+# Display Orders
 def show_orders():
     st.write("### Orders List")
     query = """
-            SELECT O.ORDER_ID, C.NAME AS CUSTOMER, P.NAME AS PRODUCT, O.QUANTITY, O.TOTAL_PRICE, O.ORDER_DATE
+            SELECT O.ORDER_ID, C.NAME AS CUSTOMER, P.NAME AS PRODUCT, P.TICKER AS TICKER, P.EXCHANGE AS EXCHANGE, O.QUANTITY, O.TOTAL_PRICE, O.ORDER_DATE
             FROM ORDERS O
             JOIN CUSTOMERS C ON C.ID = O.CUSTOMER_ID
             JOIN PRODUCTS P ON P.PRODUCT_ID = O.PRODUCT_ID
-            ORDER BY O.ORDER_DATE DESC;
+            ORDER BY O.ORDER_ID DESC;
             """
     rows = session.sql(query).collect()
     st.write(rows)
 
 
-# Function to display Products
+# Display Products
 def show_products():
     st.write("### Products List")
     rows = session.sql("SELECT * FROM PRODUCTS;").collect()
@@ -65,16 +65,17 @@ def show_products():
 
     with prod_left.form("add_product"):
         name = st.text_input("Name")
-        category = st.text_input("Category")
+        ticker = st.text_input("Ticker")
+        exchange = st.text_input("Exchange")
         price = st.number_input("Price", min_value=0.01)
         submitted = st.form_submit_button("Add Product")
 
-        if submitted and name and category:
+        if submitted and name and ticker and exchange:
             session.sql("""
-                        INSERT INTO PRODUCTS (NAME, CATEGORY, PRICE)
+                        INSERT INTO PRODUCTS (NAME, TICKER, EXCHANGE, PRICE)
                         VALUES (?, ?, ?)
                         """, 
-                        params=[name, category, price]).collect()
+                        params=[name, ticker, price]).collect()
             
             st.success("Product added!")
             st.rerun()
